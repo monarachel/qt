@@ -9,7 +9,7 @@ class Connection
 {
 public:
     Connection();
-     bool createconnect();
+     bool createconnect(); //etablir la connection
 };
 
 #endif // CONNECTION_H

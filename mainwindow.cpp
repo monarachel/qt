@@ -21,8 +21,9 @@ MainWindow::~MainWindow()
 }
 
 
-void MainWindow::on_ajout_clicked()
-{int ID=ui->leid->text().toInt();
+void MainWindow::on_ajout_clicked() // appel de la methode ajouter
+{
+    int ID=ui->leid->text().toInt(); //Convertir la chaine saisie en un entier car l’attribut id est de type int
     QString NOM=ui->lenom->text();
     QString PRENOM=ui->leprenom->text();
 

@@ -40,9 +40,6 @@ QString employe::getprenom()
 }
 
 
-
-
-
 void employe::setid(int ID)
 {
     this->ID=ID;
@@ -60,27 +57,19 @@ void employe::setprenom(QString PRENOM)
 }
 
 
-
-bool employe::ajouter()
+bool employe::ajouter() //implementation de la methode ajouter
 {
-
 
     QSqlQuery query;
     QString id_string=QString::number(ID);
 
-
-
          query.prepare("INSERT INTO EMPLOYE(ID,NOM,PRENOM)" "VALUES (:ID,:NOM,:PRENOM)");
+        //creation des variables liées
          query.bindValue(":ID", ID);
          query.bindValue(":NOM", NOM);
          query.bindValue(":PRENOM", PRENOM);
 
-
-
-
-               return query.exec();
-
-
+               return query.exec(); //envoie la requette pour exécution
 }
 
 
