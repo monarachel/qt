@@ -5,14 +5,15 @@
 #include"formateur.h"
 #include<QSqlRecord>
 
+//la classe responsable de l'interface utilisateur principale de l'application.
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-      ui->letab->setModel(e.afficher());
-
-      ui->letab_2->setModel(c.afficher());
+    ui->letab->setModel(new QSqlQueryModel());    // le model va etre vide lors de l'execution
+        ui->letab_2->setModel(new QSqlQueryModel());
 }
 
 MainWindow::~MainWindow()
@@ -21,186 +22,289 @@ MainWindow::~MainWindow()
 }
 
 
-void MainWindow::on_ajout_clicked() // appel de la methode ajouter
+void MainWindow::on_ajout_clicked()
 {
-    int ID=ui->leid->text().toInt(); //Convertir la chaine saisie en un entier car l’attribut id est de type int
-    QString NOM=ui->lenom->text();
-    QString PRENOM=ui->leprenom->text();
+    // Récupérer les données saisies par l'utilisateur
+    QString idText = ui->leid->text();
+    QString nom = ui->lenom->text();
+    QString prenom = ui->leprenom->text();
 
-    employe e (ID,NOM,PRENOM);
-    bool test=e.ajouter();
-    if(test)
-    {    ui->letab->setModel(e.afficher());
-        QMessageBox::information(nullptr,QObject::tr("ok"),QObject::tr("ajout effectué\n""click cancel to exit."),QMessageBox::Cancel);
-    }else
-        QMessageBox::critical(nullptr,QObject::tr("ok"),QObject::tr("ajout non effectué\n""click cancel to exit."),QMessageBox::Cancel);
+    // Vérifier que tous les champs sont remplis
+    if (idText.isEmpty() || nom.isEmpty() || prenom.isEmpty()) {
+        QMessageBox::warning(this, QObject::tr("Erreur"), QObject::tr("Tous les champs doivent être remplis."));
+        return;
+    }
 
-    // Clear the input fields after adding the employee
-        ui->leid->clear();
-        ui->lenom->clear();
-        ui->leprenom->clear();
+    // Convertir l'ID en entier et vérifier que la conversion est réussie
+    bool ok;
+    int id = idText.toInt(&ok);
+    if (!ok || id <= 0) {
+        QMessageBox::warning(this, QObject::tr("Erreur"), QObject::tr("L'ID doit être un entier positif."));
+        return;
+    }
+
+    // Créer un objet employe avec les données validées
+    employe e(id, nom, prenom);
+
+    // Appeler la méthode ajouter et vérifier si l'ajout a réussi
+    bool test = e.ajouter();
+    if (test) {
+        // Mettre à jour la table dans l'interface utilisateur
+        ui->letab->setModel(e.afficher());
+        QMessageBox::information(this, QObject::tr("Succès"), QObject::tr("Ajout effectué.\nCliquez sur OK pour quitter."));
+    } else {
+        QMessageBox::critical(this, QObject::tr("Erreur"), QObject::tr("Ajout non effectué.\nCliquez sur OK pour quitter."));
+    }
+
+    // Vider les champs de saisie après l'ajout
+    ui->leid->clear();
+    ui->lenom->clear();
+    ui->leprenom->clear();
 }
+
 
 void MainWindow::on_affiche_clicked()
 {
-e.afficher();
+
+    QSqlQueryModel* model = e.afficher();
+
+    // Mise à jour de la vue de table avec les données récupérées
+    ui->letab->setModel(model);
 }
+
 
 void MainWindow::on_supprime_clicked()
 {
+    int id = ui->leid1->text().toInt(); // Convertir le texte en entier
 
-    int id=ui->leid1->text().toInt();
-    bool test=e.supprimer(id);
-    if(test)
-    {   ui->letab->setModel(e.afficher());
-        QMessageBox::information(nullptr,QObject::tr("ok"),QObject::tr("suppression effectueé\n""click cancel to exit."),QMessageBox::Cancel);
-    }else
-        QMessageBox::critical(nullptr,QObject::tr("ok"),QObject::tr("supression non effectueé\n""click cancel to exit."),QMessageBox::Cancel);
+    employe e(id); // Créer un objet employé avec l'ID fourni
 
-    // Clear the input field after deletion
-        ui->leid1->clear();
+    // Vérifier si l'employé existe avant de tenter la suppression
+    if (!e.existe()) {
+        QMessageBox::warning(nullptr, QObject::tr("Suppression employé"),
+                    QObject::tr("Échec de la suppression : L'employé avec cet ID n'existe pas.\n"
+                                "Cliquer OK pour quitter."), QMessageBox::Ok);
+        return;
+    }
+
+    bool test = e.supprimer(id);
+    if (test) {
+        ui->letab->setModel(e.afficher());
+        QMessageBox::information(nullptr, QObject::tr("Suppression employé"),
+                    QObject::tr("Suppression effectuée.\n"
+                                "Cliquer OK pour quitter."), QMessageBox::Ok);
+    } else {
+        QMessageBox::critical(nullptr, QObject::tr("Suppression employé"),
+                    QObject::tr("Échec de la suppression.\n"
+                                "Cliquer OK pour quitter."), QMessageBox::Ok);
+    }
+
+    // Effacer le champ de saisie après la suppression
+    ui->leid1->clear();
 }
 
-void MainWindow::on_clear_clicked()
 
+void MainWindow::on_clear_clicked() // Cliquer sur le bouton modifier employe
 {
     QString idText = ui->leid2->text();
     int id = idText.toInt();  // Convertir l'ID en entier
-    QString prenom = ui->leprenom2->text();
-    QString nom = ui->lenom2->text();
+    QString prenom = ui->leprenom2->text(); // ui:interface utilisateur, leprenom2: widget(QLineEdit)
+    QString nom = ui->lenom2->text();  // text() méthode pour retourner le champ sous forme de chaîne de caractères (QString)
 
-    // verifier si l'ID est vide
-        if (idText.isEmpty()) {
-            QMessageBox::critical(nullptr, QObject::tr("Modifier employe"),
-                        QObject::tr("Employé non modifié. ID invalide.\n"
-                                    "Cliquer quitter."), QMessageBox::Cancel);
-            return;
-        }
+    // Vérifier si l'ID est vide
+    if (idText.isEmpty()) {
+        QMessageBox::critical(nullptr, QObject::tr("Modifier employe"),
+                    QObject::tr("Employé non modifié. ID invalide.\n"
+                                "Cliquer quitter."), QMessageBox::Cancel);
+        return;
+    }
 
-        // si prenom vide
+    // Vérifier si le prénom est vide
     if (prenom.isEmpty()) {
         QMessageBox::critical(nullptr, QObject::tr("Modifier employe"),
-                    QObject::tr("Employe non Modifié. Prénom invalide.\n"
+                    QObject::tr("Employé non modifié. Prénom invalide.\n"
                                 "Cliquer quitter."), QMessageBox::Cancel);
         return;
     }
 
-    // si nom vide
+    // Vérifier si le nom est vide
     if (nom.isEmpty()) {
         QMessageBox::critical(nullptr, QObject::tr("Modifier employe"),
-                    QObject::tr("Employe non Modifie. Nom invalide.\n"
+                    QObject::tr("Employé non modifié. Nom invalide.\n"
                                 "Cliquer quitter."), QMessageBox::Cancel);
         return;
     }
 
+    // Créer un objet employé pour vérifier l'existence de l'ID
+    employe e(id, nom, prenom);
 
-    employe e (id, nom, prenom);
-
-    if(e.modifier()) {
-        QMessageBox::information(nullptr, QObject::tr("Modifier employe"),
-                    QObject::tr("Employe modifié.\n"
+    // Vérifier si l'ID existe
+    if (!e.existe()) {
+        QMessageBox::critical(nullptr, QObject::tr("Modifier employe"),
+                    QObject::tr("Employé non modifié. ID n'existe pas.\n"
                                 "Cliquer quitter."), QMessageBox::Cancel);
-        ui->letab->setModel(e.afficher());
-
-        // Clear the input fields after modification
-                ui->leid2->clear();
-                ui->leprenom2->clear();
-                ui->lenom2->clear();
+        return;
     }
-  }
+
+    // Si l'ID existe, procéder à la modification
+    if (e.modifier()) {
+        QMessageBox::information(nullptr, QObject::tr("Modifier employe"),
+                    QObject::tr("Employé modifié.\n"
+                                "Cliquer quitter."), QMessageBox::Cancel);
+        ui->letab->setModel(e.afficher()); // Mettre à jour le tableau d'affichage des employés
+
+        // Effacer les champs de saisie après la modification
+        ui->leid2->clear();
+        ui->leprenom2->clear();
+        ui->lenom2->clear();
+    }
+}
 
 void MainWindow::on_letrie_clicked()
 {employe e;
-       ui->letab->setModel(e.tri_nom());
+       ui->letab->setModel(e.tri_nom()); //faire le tri par nom
 }
 
 void MainWindow::on_letrie2_clicked()
 {
     employe e;
-           ui->letab->setModel(e.tri_id());
+           ui->letab->setModel(e.tri_id()); //faire le tri parr id
 }
 
-void MainWindow::on_clear_2_clicked(){
+void MainWindow::on_clear_2_clicked()
+{
+    int CIN = ui->leid2_2->text().toInt();
+    QString NOMFORMATION = ui->lenom2_2->text();
 
+    // Vérifier si les champs sont vides
+    if (NOMFORMATION.isEmpty()) {
+        QMessageBox::critical(nullptr, QObject::tr("Modifier formation"),
+                    QObject::tr("Formation non modifiée. Nom invalide.\n"
+                                "Cliquer quitter."), QMessageBox::Cancel);
+        return;
+    }
 
+    formateur h(CIN, NOMFORMATION);
 
-int CIN = ui->leid2_2->text().toInt();
-QString NOMFORMATION = ui->lenom2_2->text();
+    // Vérifier si la formation existe avant de modifier
+    if (!h.existe()) {
+        QMessageBox::critical(nullptr, QObject::tr("Modifier formation"),
+                    QObject::tr("Formation non modifiée. CIN invalide.\n"
+                                "Cliquer quitter."), QMessageBox::Cancel);
+        return;
+    }
 
+    // Effectuer la modification
+    if (h.modifier()) {
+        QMessageBox::information(nullptr, QObject::tr("Modifier formation"),
+                    QObject::tr("Modifié.\n"
+                                "Cliquer quitter."), QMessageBox::Cancel);
+        ui->letab_2->setModel(h.afficher());
 
-if (NOMFORMATION.isEmpty()) {
-    QMessageBox::critical(nullptr, QObject::tr("Modifier formateur"),
-                QObject::tr("formateur non Modifie. Nom invalide.\n"
-                            "Cliquer quitter."), QMessageBox::Cancel);
-    return;
+        // Clear les champs de saisie après la modification
+        ui->leid2_2->clear();
+        ui->lenom2_2->clear();
+    }
 }
 
-formateur h (CIN,NOMFORMATION);
-
-if(h.modifier()) {
-    QMessageBox::information(nullptr, QObject::tr("Modifier formateur"),
-                QObject::tr("modifié.\n"
-                            "Cliquer quitter."), QMessageBox::Cancel);
-    ui->letab_2->setModel(h.afficher());
-
-    // Clear the input fields after modification
-           ui->leid2_2->clear();
-           ui->lenom2_2->clear();
-
-}
-}
 
 void MainWindow::on_ajout_2_clicked()
-{int CIN=ui->leid_2->text().toInt();
-    QString NOMFORMATION=ui->lenom_2->text();
+{
+    // Récupérer les données saisies par l'utilisateur
+    QString cinText = ui->leid_2->text();
+    QString nomFormation = ui->lenom_2->text();
 
+    // Vérifier que tous les champs sont remplis
+    if (cinText.isEmpty() || nomFormation.isEmpty()) {
+        QMessageBox::warning(this, QObject::tr("Erreur"), QObject::tr("Tous les champs doivent être remplis."));
+        return;
+    }
 
-    formateur h (CIN,NOMFORMATION);
-    bool test=h.ajouter();
-    if(test)
-    {    ui->letab_2->setModel(h.afficher());
-        QMessageBox::information(nullptr,QObject::tr("ok"),QObject::tr("ajouter effectueé\n""click cancel to exit."),QMessageBox::Cancel);
-        // Nettoyer les champs de saisie après l'ajout
-               ui->leid_2->clear();
-               ui->lenom_2->clear();
-    }else
-        QMessageBox::critical(nullptr,QObject::tr("ok"),QObject::tr("ajouter non effectueé\n""click cancel to exit."),QMessageBox::Cancel);
+    // Convertir le CIN en entier et vérifier que la conversion est réussie
+    bool ok;
+    int cin = cinText.toInt(&ok);
+    if (!ok || cin <= 0) {
+        QMessageBox::warning(this, QObject::tr("Erreur"), QObject::tr("Le CIN doit être un entier positif."));
+        return;
+    }
 
+    // Créer un objet formateur avec les données validées
+    formateur h(cin, nomFormation);
+
+    // Appeler la méthode ajouter et vérifier si l'ajout a réussi
+    bool test = h.ajouter();
+    if (test) {
+        // Mettre à jour la table dans l'interface utilisateur
+        ui->letab_2->setModel(h.afficher());
+        QMessageBox::information(this, QObject::tr("Succès"), QObject::tr("Ajout effectué.\nCliquez sur OK pour quitter."));
+    } else {
+        QMessageBox::critical(this, QObject::tr("Erreur"), QObject::tr("Ajout non effectué.\nCliquez sur OK pour quitter."));
+    }
+
+    // Nettoyer les champs de saisie après l'ajout
+    ui->leid_2->clear();
+    ui->lenom_2->clear();
 }
+
 
 void MainWindow::on_affiche_2_clicked()
-{c.afficher();
-
-}
-
-void MainWindow::on_supprime_2_clicked()
 {
-    int CIN=ui->leid1_2->text().toInt();
-    bool test=c.supprimer(CIN);
-    if(test)
-    {   ui->letab_2->setModel(c.afficher());
-        QMessageBox::information(nullptr,QObject::tr("ok"),QObject::tr("suppression effectueé\n""click cancel to exit."),QMessageBox::Cancel);
-
-        // Clear the input fields after successful deletion
-               ui->leid1_2->clear();
-    }else
-        QMessageBox::critical(nullptr,QObject::tr("ok"),QObject::tr("supression non effectueé\n""click cancel to exit."),QMessageBox::Cancel);
-
+    QSqlQueryModel* model = c.afficher();
+    ui->letab_2->setModel(model);
 }
 
-void MainWindow::on_letrie_2_clicked()
+
+void MainWindow::on_supprime_2_clicked() // Function to delete formateur
+{
+    int CIN = ui->leid1_2->text().toInt(); // Retrieve CIN from input field
+
+    // Check if CIN is valid
+    if (CIN <= 0) {
+        QMessageBox::warning(nullptr, QObject::tr("Suppression formation"),
+                    QObject::tr("CIN invalide. Veuillez entrer un CIN valide.\n"
+                                "Cliquer OK pour quitter."), QMessageBox::Ok);
+        return;
+    }
+
+    formateur c(CIN); // Create a formateur object with the CIN
+
+    if (!c.existe()) { // Check if the formateur exists
+        QMessageBox::warning(nullptr, QObject::tr("Suppression formation"),
+                    QObject::tr("Échec de la suppression : La formation avec ce CIN n'existe pas.\n"
+                                "Cliquer OK pour quitter."), QMessageBox::Ok);
+        return;
+    }
+
+    bool test = c.supprimer(CIN); // Try to delete the formateur
+    if (test) {
+        ui->letab_2->setModel(c.afficher()); // Refresh the table view
+        QMessageBox::information(nullptr, QObject::tr("Suppression formation"),
+                    QObject::tr("Suppression effectuée.\n"
+                                "Cliquer OK pour quitter."), QMessageBox::Ok);
+    } else {
+        QMessageBox::critical(nullptr, QObject::tr("Suppression formation"),
+                    QObject::tr("Échec de la suppression.\n"
+                                "Cliquer OK pour quitter."), QMessageBox::Ok);
+    }
+
+    // Clear the input field after deletion
+    ui->leid1_2->clear();
+}
+
+
+void MainWindow::on_letrie_2_clicked() //faire le tri far nom de la formation
 {
   formateur h;
            ui->letab_2->setModel(h.tri_nomformation());
 }
 
-void MainWindow::on_letrie2_2_clicked()
+void MainWindow::on_letrie2_2_clicked() //faire tri par id
 {
     formateur h;
            ui->letab_2->setModel(h.tri_cin());
 }
 
-void MainWindow::on_pushButton_clicked()
+void MainWindow::on_pushButton_clicked() //fct recherche d'un employé par l'attribu ID
 {
     employe F1;
 
@@ -243,7 +347,7 @@ void MainWindow::on_pushButton_clicked()
 }
 
 
-void MainWindow::on_pushButton_2_clicked()
+void MainWindow::on_pushButton_2_clicked() //fct recherche d'une formation par l'attribu ID
 {
     formateur F1;
 
@@ -269,7 +373,7 @@ void MainWindow::on_pushButton_2_clicked()
         ui->letab_2->setModel(model);
     } else {
         // Aucun résultat trouvé
-        msgBox.setText("Échec de la recherche : Aucun employé trouvé avec cet CIN.");
+        msgBox.setText("Échec de la recherche : Aucun employé trouvé avec cette ID.");
     }
 
     // Afficher le message dans un pop-up
@@ -282,12 +386,12 @@ void MainWindow::on_pushButton_2_clicked()
 
 }
 
-void MainWindow::on_exportpdf_clicked()
+void MainWindow::on_exportpdf_clicked() //expoter le tableau des employé en fichier PDF
 {
       e.exportt();
 }
 
-void MainWindow::on_pushButton_3_clicked()
+void MainWindow::on_pushButton_3_clicked() //fct poour compter nombre des employés
 {
     {
        employe F;
@@ -295,7 +399,7 @@ void MainWindow::on_pushButton_3_clicked()
         // Appelez la fonction statistique
         QMap<QString, QVariant> statistics = F.getStatistics();
 
-        // Affichez les résultats où vous le souhaitez, par exemple dans une boîte de dialogue
+        // Affichez les résultats dans une boîte de dialogue
         QString message = "Statistiques des employes:\n";
         for (auto it = statistics.begin(); it != statistics.end(); ++it) {
             message += QString("%1: %2\n").arg(it.key(), it.value().toString());

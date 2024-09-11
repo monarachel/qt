@@ -4,11 +4,12 @@
 #include<QString>
 #include<QTableView>
 
-class employe
+class employe // declaration des fcts
 {
 public:
    employe(); //constructeur
    employe (int,QString,QString);
+   employe(int);
 //getter
     int getid();
     QString getnom();
@@ -28,6 +29,7 @@ bool supprimer(int);
  void exportt();
 void clearTable(QTableView *table);
 bool modifier();
+bool existe() const;
 QMap<QString, QVariant>getStatistics();
 private:
     int ID;

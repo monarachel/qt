@@ -5,7 +5,7 @@
 #include <QtSql/QSqlError>
 #include <QtSql/QSqlQuery>
 
-class Connection
+class Connection // declaration des fcts
 {
 public:
     Connection();

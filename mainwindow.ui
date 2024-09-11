@@ -196,7 +196,7 @@
     <property name="geometry">
      <rect>
       <x>930</x>
-      <y>20</y>
+      <y>10</y>
       <width>251</width>
       <height>41</height>
      </rect>
@@ -209,7 +209,7 @@
      </font>
     </property>
     <property name="text">
-     <string>GESTION FORMATEUR</string>
+     <string>GESTION FORMATION</string>
     </property>
    </widget>
    <widget class="QLineEdit" name="lineEdit">
@@ -429,7 +429,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Suppression par CIN</string>
+     <string>Suppression par ID</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_4">
@@ -442,7 +442,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>CIN</string>
+     <string>ID</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_5">
@@ -468,7 +468,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>CIN</string>
+     <string>ID</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_7">
@@ -520,7 +520,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>CIN</string>
+     <string>ID</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_11">
@@ -546,7 +546,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Recherche par CIN</string>
+     <string>Recherche par ID</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_14">
@@ -559,7 +559,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Tri par CIN</string>
+     <string>Tri par ID</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_15">
@@ -806,7 +806,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>CIN</string>
+     <string>ID</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_34">

@@ -15,6 +15,10 @@ formateur::formateur()
 
 
 }
+formateur::formateur (int CIN)
+{
+    this->CIN=CIN;
+}
 formateur::formateur (int CIN,QString NOMFORMATION)
 {
     this->CIN=CIN;
@@ -64,7 +68,7 @@ bool formateur::ajouter()
 }
 
 
-bool formateur::supprimer(int   CIN)
+bool formateur::supprimer(int CIN)
 {
     QSqlQuery query;
 
@@ -81,7 +85,7 @@ QSqlQueryModel *formateur::afficher()
     QSqlQueryModel *model=new QSqlQueryModel();
 
           model->setQuery("SELECT* FROM FORMATEUR");
-          model->setHeaderData(0, Qt::Horizontal, QObject::tr("CIN"));
+          model->setHeaderData(0, Qt::Horizontal, QObject::tr("ID"));
           model->setHeaderData(1, Qt::Horizontal, QObject::tr("Nom"));
 
           return  model;
@@ -105,8 +109,8 @@ QSqlQueryModel * formateur::tri_cin()
 {QSqlQueryModel * model= new QSqlQueryModel();
 
 model->setQuery("select * from FORMATEUR order by CIN");
-model->setHeaderData(0, Qt::Horizontal, QObject::tr("CIN"));
-model->setHeaderData(1, Qt::Horizontal, QObject::tr("NOMFORMATION"));
+model->setHeaderData(0, Qt::Horizontal, QObject::tr("ID"));
+model->setHeaderData(1, Qt::Horizontal, QObject::tr("NOM"));
 
 
     return model;
@@ -117,8 +121,8 @@ QSqlQueryModel * formateur::tri_nomformation()
 {QSqlQueryModel * model= new QSqlQueryModel();
 
 model->setQuery("select * from FORMATEUR order by NOMFORMATION");
-model->setHeaderData(0, Qt::Horizontal, QObject::tr("CIN"));
-model->setHeaderData(1, Qt::Horizontal, QObject::tr("NOMFORMATION"));
+model->setHeaderData(0, Qt::Horizontal, QObject::tr("ID"));
+model->setHeaderData(1, Qt::Horizontal, QObject::tr("NOM"));
 
     return model;
 }
@@ -146,6 +150,16 @@ QSqlQueryModel* formateur::chercheCIN(int CIN)
     return model;
 }
 
+bool formateur::existe() const {
+    // Implémentation pour vérifier si la formation existe
+    QSqlQuery query;
+    query.prepare("SELECT COUNT(*) FROM FORMATEUR WHERE CIN = :CIN");
+    query.bindValue(":CIN", CIN);
+    if (query.exec() && query.next()) {
+        return query.value(0).toInt() > 0;
+    }
+    return false;
+}
 
 void formateur::clearTable(QTableView *table)
 {

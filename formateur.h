@@ -4,11 +4,13 @@
 #include<QSqlQueryModel>
 #include<QString>
 #include<QTableView>
-class formateur
+
+class formateur // declaration des fcts
 {
 public:
     formateur();
    formateur(int,QString);
+   formateur(int);
     int getcin();
 
 
@@ -23,7 +25,7 @@ bool ajouter();
 QSqlQueryModel *afficher();
 QSqlQueryModel * tri_cin();
 QSqlQueryModel *tri_nomformation();
-
+bool existe() const;
 bool supprimer(int);
 QSqlQueryModel*  chercheCIN(int CIN);
 void clearTable(QTableView *table);

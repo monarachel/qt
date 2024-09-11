@@ -10,13 +10,17 @@
 #include<QMessageBox>
 #include<QSqlError>
 #include<qpainter.h>
-
+//code source: l'implémentation des fonctions et des méthodes définies
 employe::employe()
 {
     ID=0;
       NOM=" ";
       PRENOM=" ";
 
+}
+employe::employe(int ID)
+{
+    this->ID=ID;
 }
 employe::employe (int ID,QString NOM,QString PRENOM)
 {
@@ -99,6 +103,7 @@ QSqlQueryModel *employe::afficher()
 
           return  model;
 }
+
 bool employe::modifier()
 {
     QSqlQuery q;
@@ -255,3 +260,13 @@ QMap<QString, QVariant> employe::getStatistics()
 
     return statistics;
     }}
+
+bool employe::existe() const {
+    QSqlQuery query;
+    query.prepare("SELECT COUNT(*) FROM EMPLOYE WHERE ID = :id");
+    query.bindValue(":id", ID);
+    if (query.exec() && query.next()) {
+        return query.value(0).toInt() > 0;
+    }
+    return false;
+}
