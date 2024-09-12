@@ -11,7 +11,7 @@
 formateur::formateur()
 {
     CIN=0;
-      NOMFORMATION=" ";
+      NOMFORMATION=" ";             //constructors
 
 
 }

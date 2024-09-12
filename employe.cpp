@@ -14,7 +14,7 @@
 employe::employe()
 {
     ID=0;
-      NOM=" ";
+      NOM=" ";              //les constructeurs
       PRENOM=" ";
 
 }
@@ -127,17 +127,7 @@ model->setHeaderData(2, Qt::Horizontal, QObject::tr("NOM"));
     return model;
 }
 
-QSqlQueryModel * employe::tri_prenom()
-{QSqlQueryModel * model= new QSqlQueryModel();
 
-model->setQuery("select * from EMPLOYE order by PRENOM");
-model->setHeaderData(0, Qt::Horizontal, QObject::tr("ID"));
-model->setHeaderData(1, Qt::Horizontal, QObject::tr("PRENOM"));
-model->setHeaderData(2, Qt::Horizontal, QObject::tr("NOM"));
-
-
-    return model;
-}
 QSqlQueryModel * employe::tri_nom()
 {QSqlQueryModel * model= new QSqlQueryModel();
 
@@ -269,4 +259,44 @@ bool employe::existe() const {
         return query.value(0).toInt() > 0;
     }
     return false;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+QSqlQueryModel * employe::tri_prenom()
+{QSqlQueryModel * model= new QSqlQueryModel();
+
+model->setQuery("select * from EMPLOYE order by PRENOM");
+model->setHeaderData(0, Qt::Horizontal, QObject::tr("ID"));
+model->setHeaderData(1, Qt::Horizontal, QObject::tr("PRENOM"));
+model->setHeaderData(2, Qt::Horizontal, QObject::tr("NOM"));
+
+
+    return model;
 }
