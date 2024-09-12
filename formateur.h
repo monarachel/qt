@@ -5,7 +5,7 @@
 #include<QString>
 #include<QTableView>
 
-class formateur // declaration des fcts
+class formateur // declaration des fc
 {
 public:
     formateur();
